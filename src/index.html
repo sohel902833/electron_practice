@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h1>💖 Hello World! Md Sohrab Hossain</h1>
+    <p>Welcome to your Electron application.</p>
+    <input id="input" type="text" />
+    <button id="button">Buy this product</button>
+    <script>
+      console.log("Test", window.test);
+      const input = document.getElementById("input");
+      const button = document.getElementById("button");
+
+      button.addEventListener("click", () => {
+        const value = input.value;
+
+        window.main_methods.send(value);
+      });
+
+      // window.addEventListener("DOMContentLoaded", () => {
+
+      // });
+    </script>
+  </body>
+</html>
