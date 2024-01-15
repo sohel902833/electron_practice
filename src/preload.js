@@ -2,14 +2,26 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("test", "Hello World!!");
 
+window.addEventListener("DOMContentLoaded", () => {
+  const fileData = document.getElementById("fileData");
+  ipcRenderer.on("on_file_open", (e, data) => {
+    fileData.innerText = data;
+  });
+});
+
 ipcRenderer.on("main_process", (event, data) => {
   console.log("Preload main", data);
 });
 
 contextBridge.exposeInMainWorld("main_methods", {
-  send: (data) => {
+  send: async (data) => {
     console.log("Test");
 
-    ipcRenderer.invoke("preload_main", data);
+    const response = await ipcRenderer.invoke("preload_main", data);
+
+    console.log("Main Response", response);
+  },
+  createWindow: () => {
+    ipcRenderer.invoke("create_new_window", "yes");
   },
 });

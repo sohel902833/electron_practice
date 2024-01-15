@@ -1,7 +1,15 @@
-const { app, BrowserWindow, ipcRenderer, ipcMain } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcRenderer,
+  ipcMain,
+  Menu,
+  dialog,
+} = require("electron");
 const path = require("path");
 const windowStateKeeper = require("electron-window-state");
 const isDev = require("electron-is-dev");
+const fs = require("fs");
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -21,6 +29,8 @@ const createWindow = () => {
     width: mainWindowState.width,
     height: mainWindowState.height,
     title: "HELLO 234",
+    minHeight: 500,
+    minWidth: 400,
     webPreferences: {
       // nodeIntegration: true,
       // contextIsolation: false,
@@ -51,8 +61,59 @@ app.on("ready", () => {
   }, 3000);
   ipcMain.handle("preload_main", (e, data) => {
     console.log("From preload", data);
+    return "ami paici data";
+  });
+
+  ipcMain.handle("create_new_window", (e) => {
+    const childWindow = new BrowserWindow({
+      height: 300,
+      width: 400,
+      parent: mainWindow,
+      modal: true,
+    });
+    childWindow.loadURL("http://google.com");
   });
 });
+
+const menuTabs = [
+  {
+    label: "File",
+    submenu: [
+      {
+        label: "Open",
+        click: async () => {
+          const { canceled, filePaths } = await dialog.showOpenDialog();
+          if (!canceled) {
+            const filePath = filePaths[0];
+            const fileInfo = fs.readFile(filePath, (error, data) => {
+              if (error) {
+                return console.log(data);
+              } else {
+                const fileData = data.toString();
+                mainWindow.webContents.send("on_file_open", fileData);
+              }
+            });
+          }
+        },
+      },
+      {
+        label: "Save",
+      },
+      {
+        label: "Save As",
+      },
+      {
+        label: "Exit",
+      },
+    ],
+  },
+  {
+    label: "Insert",
+  },
+];
+
+const appMenu = Menu.buildFromTemplate(menuTabs);
+Menu.setApplicationMenu(appMenu);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
