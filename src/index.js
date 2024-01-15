@@ -75,6 +75,7 @@ app.on("ready", () => {
   });
 });
 
+let openFilePath = "";
 const menuTabs = [
   {
     label: "File",
@@ -85,6 +86,7 @@ const menuTabs = [
           const { canceled, filePaths } = await dialog.showOpenDialog();
           if (!canceled) {
             const filePath = filePaths[0];
+            openFilePath = filePaths[0];
             const fileInfo = fs.readFile(filePath, (error, data) => {
               if (error) {
                 return console.log(data);
@@ -98,6 +100,10 @@ const menuTabs = [
       },
       {
         label: "Save",
+        click: async () => {
+          mainWindow.webContents.send("on_save_file");
+        },
+        accelerator: "CmdorCtrl+S",
       },
       {
         label: "Save As",
@@ -114,6 +120,24 @@ const menuTabs = [
 
 const appMenu = Menu.buildFromTemplate(menuTabs);
 Menu.setApplicationMenu(appMenu);
+
+ipcMain.handle("on_save_file", async (e, data) => {
+  if (openFilePath === "") {
+    const { canceled, filePath } = await dialog.showSaveDialog();
+    if (!canceled) {
+      openFilePath = filePath;
+    }
+  }
+
+  console.log("Data", data, openFilePath);
+  fs.writeFile(openFilePath, data, (err) => {
+    if (err) {
+      return console.log(err);
+    } else {
+      console.log("File Saved");
+    }
+  });
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

@@ -5,7 +5,11 @@ contextBridge.exposeInMainWorld("test", "Hello World!!");
 window.addEventListener("DOMContentLoaded", () => {
   const fileData = document.getElementById("fileData");
   ipcRenderer.on("on_file_open", (e, data) => {
-    fileData.innerText = data;
+    fileData.value = data;
+  });
+
+  ipcRenderer.on("on_save_file", () => {
+    ipcRenderer.invoke("on_save_file", fileData.value);
   });
 });
 
